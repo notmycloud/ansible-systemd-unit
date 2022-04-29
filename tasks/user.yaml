@@ -1,0 +1,65 @@
+---
+- name: "Systemd | {{ systemd_user }} | User prerequisites"
+  block: 
+
+  - name: "Systemd | {{ systemd_user }} | Get home directory"
+    ansible.builtin.user:
+      name: "{{ systemd_user }}"
+      state: present
+    register: user_info
+
+  - name: "Systemd | {{ systemd_user }} | Set Systemd directory"
+    ansible.builtin.set_fact:
+      user_systemd_path: "{{ user_info.home }}/.config/systemd/user"
+
+  - name: "Systemd | {{ systemd_user }} | Create Systemd directory"
+    ansible.builtin.file:
+      path: "{{ user_systemd_path }}"
+      state: directory
+      mode: '0700'
+      # recurse: yes
+
+  - name: "Systemd | {{ systemd_user }} | Fix Systemd connection"
+    ansible.builtin.lineinfile:
+      dest: "~/.bashrc"
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+    loop:
+      - regexp: "^#?export XDG_RUNTIME_DIR"
+        line: "export XDG_RUNTIME_DIR=\"${XDG_RUNTIME_DIR:-/run/user/$UID}\""
+      - regexp: "^#?export DBUS_SESSION_BUS_ADDRESS"
+        line: "export DBUS_SESSION_BUS_ADDRESS=\"${DBUS_SESSION_BUS_ADDRESS:-unix:path=${XDG_RUNTIME_DIR}/bus}\""
+  
+  become_user: "Systemd | {{ systemd_user }}"
+  become: true
+  when: systemd_user != "root"
+
+- name: "Systemd | {{ systemd_user }} | Enable lingering"
+  block:
+
+  - name: "Systemd | {{ systemd_user }} | Check if lingering is enabled"
+    ansible.builtin.stat: 
+      path: "/var/lib/systemd/linger/{{ systemd_user }}"
+    register: linger
+
+  - name: "Systemd | {{ systemd_user }} | Enable lingering"
+    ansible.builtin.command: "loginctl enable-linger {{ systemd_user }}"
+    when: 
+      - not linger.stat.exists
+      - systemd_config.enable_linger | default('yes')
+  
+  become: true
+  when: 
+    - systemd_user != "root"
+    - systemd_config.enable_linger | default('yes')
+
+- name: "Systemd | {{ systemd_user }} | Create Systemd Units"
+  ansible.builtin.include_tasks: 
+    file: "systemd.yaml"
+  vars:
+    unit_type: "{{ systemd_type.value }}"
+    systemd_path: "{% if systemd_user == 'root' %}/etc/systemd/system{% else %}{{ user_systemd_path }}{% endif %}"
+  loop: "{{ systemd_config | dict2items }}"
+  loop_control:
+    loop_var: systemd_type
+  when: systemd_type.key != "enable_linger"

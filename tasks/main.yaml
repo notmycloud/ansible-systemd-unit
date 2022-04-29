@@ -1,0 +1,10 @@
+---  
+- name: "Systemd configuration"
+  ansible.builtin.include_tasks: 
+    file: "user.yaml"
+  vars:
+    systemd_user: "{{ systemd_users.key }}"
+    systemd_config: "{{ systemd_users.value }}"
+  loop: "{{ systemd_units | dict2items }}"
+  loop_control:
+    loop_var: systemd_users

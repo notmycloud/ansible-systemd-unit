@@ -1,0 +1,14 @@
+## ANSIBLE MANAGED
+{% for section, options in unit.config.items() %}
+[{{ section }}]
+{% for option, values in options.items() %}
+{% if values is string or values is number %}
+{{ option }}={{ values }}
+{% else %}{# Else for values is string #}
+{% for value in values %}
+{{ option }}={{ value }}
+{% endfor %}{# End of values for loop #}
+{% endif %}{# End of option is string #}
+{% endfor %}{# End of option for loop#}
+
+{% endfor %}{# End of section for loop #}
