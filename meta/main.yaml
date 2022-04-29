@@ -1,5 +1,5 @@
 galaxy_info:
-  role_name: systemd-unit
+  role_name: systemd_unit
   author: Austin Arbour
   description: Generate and configure Systemd Unit files both globally and for lingering users.
   company: Not Your Cloud

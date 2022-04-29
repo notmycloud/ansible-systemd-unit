@@ -9,10 +9,10 @@
   ansible.builtin.copy:
     dest: "{{ unit_file_path }}.bak"
     src: "{{ unit_file_path }}"
-    remote_src: yes
+    remote_src: true
   # become_user: "{{ systemd_user }}"
-  failed_when: no
-  when: 
+  failed_when: false
+  when:
     - unit.options.backup_before_write is not defined or unit.options.backup_before_write is defined and unit.options.backup_before_write
     - unit_file_stat.stat.exists
 
@@ -23,8 +23,8 @@
     owner: "{{ systemd_user }}"
     group: "{{ systemd_user }}"
     mode: '0644'
-    trim_blocks: yes
-    lstrip_blocks: yes
+    trim_blocks: true
+    lstrip_blocks: true
     # TODO: Cannot analyze until Debian pushes a Systemd version that supports the alias option
     # Currently shown in Systemd 250 manpages: https://www.freedesktop.org/software/systemd/man/systemd-analyze.html#:~:text=Example%C2%A018.%C2%A0Aliasing%20a%20unit
     # https://manpages.debian.org/testing/systemd/systemd-analyze.1.en.html
@@ -37,13 +37,12 @@
 - name: "Systemd | {{ systemd_user }} | {{ systemd_type.key }} | {{ unit_file_path }} | Configure Unit"
   ansible.builtin.systemd:
     name: "{{ systemd_unit.key }}.{{ systemd_type.key }}"
-    state: "{% if unit.options.restart_on_change | default('yes') %}restarted{% else %}{{ unit.options.state | default('started') }}{% endif %}"
-    enabled: "{{ unit.options.enabled | default('yes') }}"
-    daemon_reload: yes
+    state: "{% if unit.options.restart_on_change | default('true') %}restarted{% else %}{{ unit.options.state | default('started') }}{% endif %}"
+    enabled: "{{ unit.options.enabled | default('true') }}"
+    daemon_reload: true
     scope: "{% if systemd_user == 'root' %}system{% else %}user{% endif %}"
   environment:
     # XDG_RUNTIMEDIR: "{{ user_info.uid | default('/run/user/0') }}"
     XDG_RUNTIMEDIR: "{{ user_info.uid | default(omit) }}"
   # become_user: "{{ systemd_user }}"
   when: unit_result.changed
-    

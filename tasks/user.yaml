@@ -1,6 +1,6 @@
 ---
 - name: "Systemd | {{ systemd_user }} | User prerequisites"
-  block: 
+  block:
 
   - name: "Systemd | {{ systemd_user }} | Get home directory"
     ansible.builtin.user:
@@ -29,7 +29,7 @@
         line: "export XDG_RUNTIME_DIR=\"${XDG_RUNTIME_DIR:-/run/user/$UID}\""
       - regexp: "^#?export DBUS_SESSION_BUS_ADDRESS"
         line: "export DBUS_SESSION_BUS_ADDRESS=\"${DBUS_SESSION_BUS_ADDRESS:-unix:path=${XDG_RUNTIME_DIR}/bus}\""
-  
+
   become_user: "Systemd | {{ systemd_user }}"
   become: true
   when: systemd_user != "root"
@@ -38,23 +38,23 @@
   block:
 
   - name: "Systemd | {{ systemd_user }} | Check if lingering is enabled"
-    ansible.builtin.stat: 
+    ansible.builtin.stat:
       path: "/var/lib/systemd/linger/{{ systemd_user }}"
     register: linger
 
   - name: "Systemd | {{ systemd_user }} | Enable lingering"
     ansible.builtin.command: "loginctl enable-linger {{ systemd_user }}"
-    when: 
+    when:
       - not linger.stat.exists
       - systemd_config.enable_linger | default('yes')
-  
+
   become: true
-  when: 
+  when:
     - systemd_user != "root"
     - systemd_config.enable_linger | default('yes')
 
 - name: "Systemd | {{ systemd_user }} | Create Systemd Units"
-  ansible.builtin.include_tasks: 
+  ansible.builtin.include_tasks:
     file: "systemd.yaml"
   vars:
     unit_type: "{{ systemd_type.value }}"

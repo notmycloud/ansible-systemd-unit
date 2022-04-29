@@ -1,6 +1,6 @@
 ---
 - name: "Systemd | {{ systemd_user }} | {{ systemd_type.key }} | Process Systemd Unit types"
-  ansible.builtin.include_tasks: 
+  ansible.builtin.include_tasks:
     file: "unit.yaml"
     apply:
       become_user: "{{ systemd_user }}"

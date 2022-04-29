@@ -1,6 +1,6 @@
----  
+---
 - name: "Systemd configuration"
-  ansible.builtin.include_tasks: 
+  ansible.builtin.include_tasks:
     file: "user.yaml"
   vars:
     systemd_user: "{{ systemd_users.key }}"
