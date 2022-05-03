@@ -17,11 +17,13 @@
       path: "{{ user_systemd_path }}"
       state: directory
       mode: '0700'
+      owner: "{{ systemd_user }}"
+      group: "{{ systemd_user }}"
       # recurse: yes
 
   - name: "Systemd | {{ systemd_user }} | Fix Systemd connection"
     ansible.builtin.lineinfile:
-      dest: "~/.bashrc"
+      dest: "{{ user_info.home }}/.bashrc"
       regexp: "{{ item.regexp }}"
       line: "{{ item.line }}"
     loop:
@@ -30,7 +32,7 @@
       - regexp: "^#?export DBUS_SESSION_BUS_ADDRESS"
         line: "export DBUS_SESSION_BUS_ADDRESS=\"${DBUS_SESSION_BUS_ADDRESS:-unix:path=${XDG_RUNTIME_DIR}/bus}\""
 
-  become_user: "{{ systemd_user }}"
+  # become_user: "{{ systemd_user }}"
   become: true
   when: systemd_user != "root"
 
