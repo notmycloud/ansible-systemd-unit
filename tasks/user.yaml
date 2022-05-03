@@ -30,7 +30,7 @@
       - regexp: "^#?export DBUS_SESSION_BUS_ADDRESS"
         line: "export DBUS_SESSION_BUS_ADDRESS=\"${DBUS_SESSION_BUS_ADDRESS:-unix:path=${XDG_RUNTIME_DIR}/bus}\""
 
-  become_user: "Systemd | {{ systemd_user }}"
+  become_user: "{{ systemd_user }}"
   become: true
   when: systemd_user != "root"
 
