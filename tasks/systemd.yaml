@@ -5,6 +5,7 @@
     apply:
       become_user: "{{ systemd_user }}"
       become: true
+  no_log: true
   vars:
     unit: "{{ systemd_unit.value }}"
     unit_file_path: "{% if systemd_unit.value.options.filepath is defined %}{{ systemd_unit.value.options.filepath }}{% else %}{{ systemd_path }}/{{ systemd_unit.key }}.{{ systemd_type.key }}{% endif %}"

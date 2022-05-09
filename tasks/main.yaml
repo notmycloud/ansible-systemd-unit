@@ -2,6 +2,7 @@
 - name: "Systemd configuration"
   ansible.builtin.include_tasks:
     file: "user.yaml"
+  no_log: true
   vars:
     systemd_user: "{{ systemd_users.key }}"
     systemd_config: "{{ systemd_users.value }}"

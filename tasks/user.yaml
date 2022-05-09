@@ -58,6 +58,7 @@
 - name: "Systemd | {{ systemd_user }} | Create Systemd Units"
   ansible.builtin.include_tasks:
     file: "systemd.yaml"
+  no_log: true
   vars:
     unit_type: "{{ systemd_type.value }}"
     systemd_path: "{% if systemd_user == 'root' %}/etc/systemd/system{% else %}{{ user_systemd_path }}{% endif %}"
