@@ -2,11 +2,23 @@
 - name: "Systemd | {{ systemd_user }} | User prerequisites"
   block:
 
+  # Fails in Ansible Community v6
+  # - name: "Systemd | {{ systemd_user }} | Get home directory"
+  #   ansible.builtin.user:
+  #     name: "{{ systemd_user }}"
+  #     state: present
+  #   register: user_info
+
   - name: "Systemd | {{ systemd_user }} | Get home directory"
-    ansible.builtin.user:
-      name: "{{ systemd_user }}"
-      state: present
-    register: user_info
+    ansible.builtin.shell: >
+            getent passwd {{ user }}  | awk -F: '{ print $6 }'
+    changed_when: false
+    register: user_home
+
+  - name: "Systemd | {{ systemd_user }} | Get home directory variable"
+    ansible.builtin.set_fact:
+      user_info:
+        home: "{{ user_home.stdout }}"
 
   - name: "Systemd | {{ systemd_user }} | Set Systemd directory"
     ansible.builtin.set_fact:
